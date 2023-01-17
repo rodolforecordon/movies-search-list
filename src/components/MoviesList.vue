@@ -1,16 +1,17 @@
 <script>
   import axios from 'axios'
   import MovieCard from '../components/MovieCard.vue'
+  import SearchFields from './SearchFields.vue'
 
   export default {
     name: 'MoviesList',
-    components: { MovieCard },
+    components: { MovieCard, SearchFields },
     async mounted() {
       await this.getMovies()
     },
     data() {
       return {
-        searchTitle: '',
+        searchTitle: 'Batman',
         searchType: '',
         searchYear: '',
         page: 1,
@@ -23,6 +24,7 @@
     },
     methods: {
       async getMovies() {
+
         let url = `http://localhost:3000/movies/?title=${this.searchTitle}&type=${this.searchType}&year=${this.searchYear}&page=${this.page}`;
         const getMovies = await axios.get(url);
 
@@ -33,9 +35,11 @@
         this.totalPages = Math.ceil(this.totalResults / 10)
 
         this.page++
+        url = `http://localhost:3000/movies/?title=${this.searchTitle}&type=${this.searchType}&year=${this.searchYear}&page=${this.page}`;
         const nextPage = await axios.get(url);
         this.moviesNextPage = nextPage.data.moviesList
 
+        localStorage.setItem()
         console.log('movies', this.movies)
         console.log('moviesNextPage', this.moviesNextPage)
       },
@@ -58,38 +62,12 @@
 
 <template>
   <div class="main-container">
-    <div class="search-container">
-      <label for="title-search">Title: </label>
-      <input
-        placeholder="Blade Runner..."
-        v-model.trim="searchTitle"
-        type="search"
-        id="title-search"
-        @input="searchMovies"
-      />
-
-      <label for="">Type: </label>
-      <select
-        name="typeSearch"
-        id="type-search"
-        v-model="searchType"
-        @input="searchMovies"
-      >
-        <option value=""></option>
-        <option value="movie">Movie</option>
-        <option value="series">Series</option>
-        <option value="episode">Episode</option>
-      </select>
-
-      <label for="year-search">Year: </label>
-      <input
-        placeholder="Year"
-        v-model.trim="searchYear"
-        type="search"
-        id="year-search"
-        @input="searchMovies"
-      />
-    </div>
+    <SearchFields
+      v-model:search-title="searchTitle"
+      v-model:search-type="searchType"
+      v-model:search-year="searchYear"
+      @searchChange="getMovies"
+    />
     <div class="list-container">
       <span v-if="errorMessage">{{ errorMessage }}</span>
       <ul>
@@ -115,23 +93,6 @@
   margin: 1rem auto;
   padding: 0 1rem;
   max-width: 1100px;
-}
-
-.search-container label {
-  margin-left: 1rem
-}
-#title-search {
-  width: 300px;
-  padding-left: 10px;
-}
-#type-search {
-  width: 80px;
-  padding: 4px 0;
-  text-align: center;
-}
-#year-search {
-  width: 80px;
-  text-align: center;
 }
 
 .list-container ul {
